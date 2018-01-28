@@ -7,15 +7,30 @@
 //
 
 import UIKit
+import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+    
+    let appColor = UIColor.white
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        window = UIWindow(frame: UIScreen.main.bounds)
+
+        let starterViewController = StarterViewController()
+        let navigationController = UINavigationController(rootViewController: starterViewController)
+        self.window?.tintColor = appColor
+        window?.rootViewController = navigationController
+        window?.makeKeyAndVisible()
+        
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedStringKey.foregroundColor : UIColor.white]
+        
+        FirebaseApp.configure()
+        Database.database().isPersistenceEnabled = true
+        
         return true
     }
 
