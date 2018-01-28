@@ -1,0 +1,6 @@
+framework module Pods_serverchat {
+  umbrella header "Pods-serverchat-umbrella.h"
+
+  export *
+  module * { export * }
+}

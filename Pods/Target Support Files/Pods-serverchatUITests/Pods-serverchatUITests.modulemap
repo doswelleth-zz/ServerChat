@@ -1,0 +1,6 @@
+framework module Pods_serverchatUITests {
+  umbrella header "Pods-serverchatUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
