@@ -62,7 +62,7 @@ class UsersCell: UITableViewCell {
     
     private func setUpNameAndServerImage() {
         if let id = message?.chatPartnerID {
-            let ref = Database.database().reference().child("users").child(id())
+            let ref = Database.database().reference().child("users").child(id()!)
             ref.observeSingleEvent(of: .value, with: { (snapshot) in
                 
                 if let dictionary = snapshot.value as? [String:AnyObject] {

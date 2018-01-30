@@ -43,9 +43,11 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         
         self.collectionView?.alwaysBounceVertical = true
         self.collectionView?.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 58, right: 0)
+        
         self.collectionView?.register(ServerChatCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
         setUpInputComponents()
+        setUpKeyboardObservers()
     }
     
     @objc func backTap(sender: UIButton) {
@@ -55,9 +57,9 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
     var messages = [Message]()
     
     func observeMessages() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let uid = Auth.auth().currentUser?.uid, let toUserID = user?.id else { return }
         
-        let userMessageReference = Database.database().reference().child("user-messages").child(uid)
+        let userMessageReference = Database.database().reference().child("user-messages").child(uid).child(toUserID)
         userMessageReference.observe(.childAdded, with: { (snapshot) in
             
             let messageID = snapshot.key
@@ -67,20 +69,16 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
                 guard let dictionary = snapshot.value as? [String:AnyObject] else { return }
                 let message = Message()
                 message.setValuesForKeys(dictionary)
-                
-                if message.chatPartnerID() == self.user?.id {
-                    self.messages.append(message)
-                    DispatchQueue.main.async {
-                        self.collectionView?.reloadData()
-                    }
+                self.messages.append(message)
+                DispatchQueue.main.async {
+                    self.collectionView?.reloadData()
                 }
-                
             }, withCancel: nil)
         }, withCancel: nil)
     }
     
 
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) { collectionView?.endEditing(true) }
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) { view.endEditing(true) }
     
     // Data source
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -108,10 +106,38 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! ServerChatCell
         
         let message = messages[indexPath.item]
+        setUpCell(cell: cell, message: message)
         cell.chatTextView.text = message.text
         cell.bubbleWidthAnchor?.constant = estimatedFrameForText(text: message.text!).width + 32
+
         return cell
     }
+    
+    private func setUpCell(cell: ServerChatCell, message: Message) {
+        if let serverImageURL = self.user?.serverImageURL {
+            cell.serverImageView.cacheImage(urlString: serverImageURL)
+        }
+        
+        if message.fromUserID == Auth.auth().currentUser?.uid {
+            cell.bubbleView.backgroundColor = .white
+            cell.chatTextView.textColor = .black
+            cell.serverImageView.isHidden = true
+            
+            cell.bubbleViewRightAnchor?.isActive = true
+            cell.bubbleViewLeftAnchor?.isActive = false
+        } else {
+            cell.bubbleView.backgroundColor = .black
+            cell.chatTextView.textColor = .white
+            cell.bubbleView.layer.borderWidth = 1
+            cell.bubbleView.layer.borderColor = UIColor.white.cgColor
+            cell.serverImageView.isHidden = false
+
+            cell.bubbleViewRightAnchor?.isActive = false
+            cell.bubbleViewLeftAnchor?.isActive = true
+        }
+    }
+    
+    var containerViewBottomAnchor: NSLayoutConstraint?
     
     func setUpInputComponents( ) {
         
@@ -122,7 +148,9 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         view.addSubview(containerView)
         
         containerView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        containerViewBottomAnchor = containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        containerViewBottomAnchor?.isActive = true
         containerView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         containerView.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
@@ -158,6 +186,37 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         separatorLineView.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
     }
     
+    func setUpKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        
+         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        let keyboardFrame = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as! CGRect
+        let keyboardDuration = (notification.userInfo?[UIKeyboardAnimationDurationUserInfoKey] as AnyObject).doubleValue
+        
+        containerViewBottomAnchor?.constant = -keyboardFrame.height
+        UIView.animate(withDuration: keyboardDuration!) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc func keyboardWillHide(notification: NSNotification) {
+        let keyboardDuration = (notification.userInfo?[UIKeyboardAnimationDurationUserInfoKey] as AnyObject).doubleValue
+        
+        containerViewBottomAnchor?.constant = 0
+        UIView.animate(withDuration: keyboardDuration!) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
     @objc func sendButtonTap() {
         let ref = Database.database().reference().child("messages")
         let childRef = ref.childByAutoId()
@@ -171,12 +230,12 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
                 print(error!.localizedDescription)
             }
             self.inputTextField.text = nil
-            let userMessageRef = Database.database().reference().child("user-messages").child(fromUserID)
+            let userMessageRef = Database.database().reference().child("user-messages").child(fromUserID).child(toUserID)
             
             let messageID = childRef.key
             userMessageRef.updateChildValues([messageID: 1])
             
-            let recipientUserMessagesRef = Database.database().reference().child("user-messages").child(toUserID)
+            let recipientUserMessagesRef = Database.database().reference().child("user-messages").child(toUserID).child(fromUserID)
             recipientUserMessagesRef.updateChildValues([messageID: 1])
         }
     }

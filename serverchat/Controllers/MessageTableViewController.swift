@@ -12,18 +12,17 @@ import Firebase
 private let reuseIdentifier = "reuseIdentifier"
 
 class MessageTableViewController: UITableViewController {
-        
+    
     let ref = Database.database().reference(withPath: "messages")
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        
         view.backgroundColor = .black
-       
+        
         // Customize nav bar items
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Exit", style: .plain, target: self, action: #selector(exitTap(sender:)))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "New", style: .plain, target: self, action: #selector(createNewMessage(sender:)))
-        
         
         navigationController?.hidesBarsOnTap = false
         navigationController?.hidesBarsOnSwipe = false
@@ -46,51 +45,50 @@ class MessageTableViewController: UITableViewController {
         
         let ref = Database.database().reference().child("user-messages").child(uid)
         ref.observe(.childAdded, with: { (snapshot) in
-           
-            let messageID = snapshot.key
-            let messageReference = Database.database().reference().child("messages").child(messageID)
-            messageReference.observe(.value, with: { (snapshot) in
+            
+            let userID = snapshot.key
+            Database.database().reference().child("user-messages").child(uid).child(userID).observe(.childAdded, with: { (snapshot) in
                 
-                if let dictionary = snapshot.value as? [String:AnyObject] {
-                    let message = Message()
-                    message.setValuesForKeys(dictionary)
-                    
-                    if let chatPartnerID = message.toUserID {
-                        self.messagesDictionary[chatPartnerID] = message
-                        self.messages = Array(self.messagesDictionary.values)
-                        self.messages.sort(by: { (message1, message2) -> Bool in
-                            return message1.timestamp!.intValue > message2.timestamp!.intValue
-                        })
-                    }
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
-                }
+                let messageID = snapshot.key
+                self.fetchMessageWithMessageID(messageID: messageID)
+                
             }, withCancel: nil)
         }, withCancel: nil)
     }
     
-    func retrieveMessages() {
-        let ref = Database.database().reference().child("messages")
-        ref.observe(.childAdded, with: { (snapshot) in
+    var timer: Timer?
+    
+    private func fetchMessageWithMessageID(messageID: String) {
+        let messageReference = Database.database().reference().child("messages").child(messageID)
+        messageReference.observe(.value, with: { (snapshot) in
+            
             if let dictionary = snapshot.value as? [String:AnyObject] {
                 let message = Message()
                 message.setValuesForKeys(dictionary)
                 
-                if let toID = message.toUserID {
-                    self.messagesDictionary[toID] = message
-                    self.messages = Array(self.messagesDictionary.values)
-                    self.messages.sort(by: { (message1, message2) -> Bool in
-                        return message1.timestamp!.intValue > message2.timestamp!.intValue
-                    })
+                if let chatPartnerID = message.chatPartnerID() {
+                    self.messagesDictionary[chatPartnerID] = message
                 }
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
+                self.attemptToReloadTable()
             }
         }, withCancel: nil)
     }
-        
+    
+    private func attemptToReloadTable() {
+        self.timer?.invalidate()
+        self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
+    }
+    
+    @objc func handleReloadTable() {
+        self.messages = Array(self.messagesDictionary.values)
+        self.messages.sort(by: { (message1, message2) -> Bool in
+            return message1.timestamp!.intValue > message2.timestamp!.intValue
+        })
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
+    }
+    
     @objc func exitTap(sender: UIButton) {
         do {
             try Auth.auth().signOut()
@@ -136,7 +134,7 @@ class MessageTableViewController: UITableViewController {
         let titleView = UIView()
         titleView.widthAnchor.constraint(equalToConstant: 175).isActive = true
         titleView.heightAnchor.constraint(equalToConstant: 40).isActive = true
-
+        
         // Constraints
         let containerView = UIView()
         containerView.translatesAutoresizingMaskIntoConstraints = false
@@ -191,7 +189,7 @@ class MessageTableViewController: UITableViewController {
         let message = messages[indexPath.row]
         let chatPartnerID = message.chatPartnerID()
         
-        let ref = Database.database().reference().child("users").child(chatPartnerID)
+        let ref = Database.database().reference().child("users").child(chatPartnerID!)
         ref.observe(.value, with: { (snapshot) in
             guard let dictionary = snapshot.value as? [String:AnyObject] else { return }
             let user = User()
@@ -228,6 +226,17 @@ class MessageTableViewController: UITableViewController {
         cell.selectionStyle = .none
         
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if (editingStyle == .delete) {
+            messages.remove(at: indexPath.row)
+            tableView.reloadData()
+        }
     }
     
     override func didReceiveMemoryWarning() {
