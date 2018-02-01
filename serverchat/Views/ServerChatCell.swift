@@ -10,6 +10,8 @@ import UIKit
 
 class ServerChatCell: UICollectionViewCell {
     
+    var serverChatController : ServerChatController?
+    
     let bubbleView : UIView = {
         let view = UIView()
         view.layer.cornerRadius = 10
@@ -24,16 +26,27 @@ class ServerChatCell: UICollectionViewCell {
         textView.layer.masksToBounds = true
         textView.font = UIFont.systemFont(ofSize: 16)
         textView.backgroundColor = .clear
+        textView.isEditable = false
         textView.translatesAutoresizingMaskIntoConstraints = false
         return textView
     }()
     
     let serverImageView: UIImageView = {
         let image = UIImageView()
-        image.image = UIImage(named: "Oliver")
         image.layer.cornerRadius = 16
         image.layer.masksToBounds = true
         image.contentMode = .scaleAspectFill
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
+    }()
+    
+    lazy var messageImageView: UIImageView = {
+        let image = UIImageView()
+        image.layer.cornerRadius = 16
+        image.layer.masksToBounds = true
+        image.contentMode = .scaleAspectFill
+        image.isUserInteractionEnabled = true
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(zoomTap)))
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
@@ -51,12 +64,20 @@ class ServerChatCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    @objc func zoomTap(tapGesture: UITapGestureRecognizer) {
+        if let imageView = tapGesture.view as? UIImageView {
+            self.serverChatController?.performZoomInForStartingImageView(startingImageView: imageView)
+        }
+    }
+    
     func setUpViews() {
         backgroundColor = .black
         
         addSubview(bubbleView)
         addSubview(chatTextView)
         addSubview(serverImageView)
+        
+        bubbleView.addSubview(messageImageView)
        
         // Server image view constraints
         serverImageView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 8).isActive = true
@@ -74,6 +95,12 @@ class ServerChatCell: UICollectionViewCell {
         bubbleWidthAnchor = bubbleView.widthAnchor.constraint(equalToConstant: 200)
         bubbleWidthAnchor?.isActive = true
         bubbleView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+        
+        // Message image constraints
+        messageImageView.leftAnchor.constraint(equalTo: bubbleView.leftAnchor).isActive = true
+        messageImageView.topAnchor.constraint(equalTo: bubbleView.topAnchor).isActive = true
+        messageImageView.widthAnchor.constraint(equalTo: bubbleView.widthAnchor).isActive = true
+        messageImageView.heightAnchor.constraint(equalTo: bubbleView.heightAnchor).isActive = true
         
         // Chat text view constraints
         chatTextView.leftAnchor.constraint(equalTo: bubbleView.leftAnchor, constant: 8).isActive = true
