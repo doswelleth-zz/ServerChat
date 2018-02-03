@@ -32,6 +32,7 @@ class MessageTableViewController: UITableViewController {
         
         // Customize tableview items
         tableView.showsVerticalScrollIndicator = false
+        tableView.allowsMultipleSelectionDuringEditing = true
         tableView.register(UsersCell.self, forCellReuseIdentifier: reuseIdentifier)
         
         checkIfServerIsLoggedIn()
@@ -53,6 +54,12 @@ class MessageTableViewController: UITableViewController {
                 self.fetchMessageWithMessageID(messageID: messageID)
                 
             }, withCancel: nil)
+        }, withCancel: nil)
+        
+        ref.observe(.childRemoved, with: { (snapshot) in
+            self.messagesDictionary.removeValue(forKey: snapshot.key)
+            self.attemptToReloadTable()
+        
         }, withCancel: nil)
     }
     
@@ -231,9 +238,19 @@ class MessageTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if (editingStyle == .delete) {
-            messages.remove(at: indexPath.row)
-            tableView.reloadData()
+
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let message = self.messages[indexPath.row]
+        
+        if let chatPartnerID = message.chatPartnerID() {
+            Database.database().reference().child("user-messages").child(uid).child(chatPartnerID).removeValue(completionBlock: { (error, ref) in
+                if error != nil {
+                    print(error?.localizedDescription as Any)
+                }
+                self.messagesDictionary.removeValue(forKey: chatPartnerID)
+                self.attemptToReloadTable()
+            })
         }
     }
     

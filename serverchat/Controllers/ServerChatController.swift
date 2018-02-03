@@ -13,8 +13,6 @@ import MobileCoreServices
 import AVFoundation
 
 private let reuseIdentifier = "reuseIdentifier"
-private let sendButtonTitle = "Send"
-private let inputTextFieldPlaceholder = "New message"
 
 class ServerChatController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -24,18 +22,6 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
             observeMessages()
         }
     }
-    
-    // Input textfield class reference
-    lazy var inputTextField : UITextField = {
-        let textField = UITextField()
-        textField.clearsOnBeginEditing = true
-        textField.attributedPlaceholder = NSAttributedString(string: inputTextFieldPlaceholder, attributes: [NSAttributedStringKey.foregroundColor : UIColor.white])
-        textField.textColor = .white
-        textField.tintColor = .white
-        textField.delegate = self
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        return textField
-    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -116,6 +102,7 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         cell.serverChatController = self
         
         let message = messages[indexPath.item]
+        cell.message = message
         setUpCell(cell: cell, message: message)
         cell.chatTextView.text = message.text
         
@@ -125,7 +112,10 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         } else if message.imageURL != nil {
             cell.bubbleWidthAnchor?.constant = 200
             cell.chatTextView.isHidden = true
+        } else if message.videoURL != nil {
+            
         }
+        cell.playButton.isHidden = message.videoURL == nil
         
         return cell
     }
@@ -164,61 +154,10 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
     
     var containerViewBottomAnchor: NSLayoutConstraint?
     
-    lazy var inputContainerView: UIView = {
-        
-        // Container view
-        let containerView = UIView()
-        containerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 50)
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.backgroundColor = .black
-        
-        // Image view
-        let uploadImageButton = UIButton()
-        uploadImageButton.setImage(UIImage(named: "Upload"), for: .normal)
-        uploadImageButton.layer.cornerRadius = 22
-        uploadImageButton.layer.masksToBounds = true
-        uploadImageButton.isUserInteractionEnabled = true
-        uploadImageButton.addTarget(self, action: #selector(handleUpLoad), for: .touchUpInside)
-        uploadImageButton.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(uploadImageButton)
-        
-        uploadImageButton.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
-        uploadImageButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        uploadImageButton.widthAnchor.constraint(equalToConstant: 44).isActive = true
-        uploadImageButton.heightAnchor.constraint(equalToConstant: 44).isActive = true
-        
-        // Send button
-        let sendButton = UIButton(type: .system)
-        sendButton.setTitle(sendButtonTitle, for: .normal)
-        sendButton.setTitleColor(.white, for: .normal)
-        sendButton.addTarget(self, action: #selector(sendButtonTap), for: .touchUpInside)
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(sendButton)
-        
-        sendButton.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
-        sendButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        sendButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        sendButton.heightAnchor.constraint(equalTo: containerView.heightAnchor).isActive = true
-        
-        // Input textfield constraints
-        containerView.addSubview(inputTextField)
-        inputTextField.leftAnchor.constraint(equalTo: uploadImageButton.rightAnchor, constant: 8).isActive = true
-        inputTextField.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
-        inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor).isActive = true
-        inputTextField.heightAnchor.constraint(equalTo: containerView.heightAnchor).isActive = true
-        
-        // Separator
-        let separatorLineView = UIView()
-        separatorLineView.backgroundColor = .white
-        separatorLineView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(separatorLineView)
-        
-        separatorLineView.leftAnchor.constraint(equalTo:  containerView.leftAnchor).isActive = true
-        separatorLineView.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
-        separatorLineView.widthAnchor.constraint(equalTo: containerView.widthAnchor).isActive = true
-        separatorLineView.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
-        
-        return containerView
+    lazy var inputContainerView: ServerChatInputContainerView = {
+        let serverChatInputContainerView = ServerChatInputContainerView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 50))
+        serverChatInputContainerView.serverChatController = self
+        return serverChatInputContainerView
     }()
     
     override var inputAccessoryView: UIView? {
@@ -263,7 +202,7 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
                     })
                 }
             }
-        })
+        }) 
         uploadTask.observe(.progress) { (snapshot) in
             if let completedUnitCount = snapshot.progress?.completedUnitCount {
                 self.navigationItem.title = String(completedUnitCount)
@@ -361,7 +300,7 @@ override func viewDidDisappear(_ animated: Bool) {
 }
 
 @objc func sendButtonTap() {
-    let properties = ["text" : inputTextField.text!]
+    let properties = ["text" : inputContainerView.inputTextField.text!]
     sendMessagesWithProperties(properties: properties as [String : AnyObject])
 }
 
@@ -385,7 +324,8 @@ private func sendMessagesWithProperties(properties: [String:AnyObject]) {
         if error != nil {
             print(error!.localizedDescription)
         }
-        self.inputTextField.text = nil
+        self.inputContainerView.inputTextField.text = nil
+        
         let userMessageRef = Database.database().reference().child("user-messages").child(fromUserID).child(toUserID)
         
         let messageID = childRef.key
@@ -394,11 +334,6 @@ private func sendMessagesWithProperties(properties: [String:AnyObject]) {
         let recipientUserMessagesRef = Database.database().reference().child("user-messages").child(toUserID).child(fromUserID)
         recipientUserMessagesRef.updateChildValues([messageID: 1])
     }
-}
-
-func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-    sendButtonTap()
-    return true
 }
 
 var startingFrame: CGRect?
