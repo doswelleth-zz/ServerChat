@@ -26,13 +26,13 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .black
+        view.backgroundColor = .white
         
         // Customize nav bar items
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(backTap(sender:)))
         
         self.collectionView?.alwaysBounceVertical = true
-        self.collectionView?.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 58, right: 0)
+        self.collectionView?.backgroundColor = .white
         self.collectionView?.keyboardDismissMode = .interactive
         self.collectionView?.register(ServerChatCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
@@ -40,7 +40,12 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
     }
     
     @objc func backTap(sender: UIButton) {
-        self.navigationController?.popViewController(animated: true)
+        let viewControllers = self.navigationController!.viewControllers as [UIViewController]
+        for aViewController:UIViewController in viewControllers {
+            if aViewController.isKind(of: MessageTableViewController.self) {
+                _ = self.navigationController?.popToViewController(aViewController, animated: true)
+            }
+        }
     }
     
     var messages = [Message]()
@@ -126,17 +131,15 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         }
         
         if message.fromUserID == Auth.auth().currentUser?.uid {
-            cell.bubbleView.backgroundColor = .white
-            cell.chatTextView.textColor = .black
+            cell.bubbleView.backgroundColor = UIColor.appColor()
+            cell.chatTextView.textColor = .white
             cell.serverImageView.isHidden = true
             
             cell.bubbleViewRightAnchor?.isActive = true
             cell.bubbleViewLeftAnchor?.isActive = false
         } else {
-            cell.bubbleView.backgroundColor = .black
-            cell.chatTextView.textColor = .white
-            cell.bubbleView.layer.borderWidth = 1
-            cell.bubbleView.layer.borderColor = UIColor.white.cgColor
+            cell.bubbleView.backgroundColor = UIColor.bubbleViewBackgroundColor()
+            cell.chatTextView.textColor = .black
             cell.serverImageView.isHidden = false
             
             cell.bubbleViewRightAnchor?.isActive = false
@@ -171,11 +174,13 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
     }
     
     @objc func handleUpLoad() {
-        let picker = UIImagePickerController()
-        picker.allowsEditing = true
-        picker.mediaTypes = [kUTTypeImage as String, kUTTypeMovie as String]
-        picker.delegate = self
-        present(picker, animated: true, completion: nil)
+        DispatchQueue.main.async {
+            let picker = UIImagePickerController()
+            picker.allowsEditing = true
+            picker.mediaTypes = [kUTTypeImage as String, kUTTypeMovie as String]
+            picker.delegate = self
+            self.present(picker, animated: true, completion: nil)
+        }
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
@@ -212,181 +217,198 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
             self.navigationItem.title = self.user?.name
         }
     }
-
-private func thumbNailImageForFileURL(fileURL: URL) -> UIImage? {
-    let asset = AVAsset(url: fileURL)
-    let imageGenerator = AVAssetImageGenerator(asset: asset)
     
-    do {
-        let thumbNailCGImage = try imageGenerator.copyCGImage(at: CMTime.init(seconds: 1, preferredTimescale: 60), actualTime: nil)
-        return UIImage(cgImage: thumbNailCGImage)
-    } catch let error {
-        print(error.localizedDescription)
+    private func thumbNailImageForFileURL(fileURL: URL) -> UIImage? {
+        let asset = AVAsset(url: fileURL)
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        
+        do {
+            let thumbNailCGImage = try imageGenerator.copyCGImage(at: CMTime.init(seconds: 1, preferredTimescale: 60), actualTime: nil)
+            return UIImage(cgImage: thumbNailCGImage)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+        return nil
     }
-    return nil
-}
-
-private func handleImageSelectedForInfo(info: [String:AnyObject]) {
-    var selectedPickerImage: UIImage?
     
-    if let editedImage = info[UIImagePickerControllerEditedImage] as? UIImage {
-        selectedPickerImage = editedImage
-    } else if let originalImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
-        selectedPickerImage = originalImage
+    private func handleImageSelectedForInfo(info: [String:AnyObject]) {
+        var selectedPickerImage: UIImage?
+        
+        if let editedImage = info[UIImagePickerControllerEditedImage] as? UIImage {
+            selectedPickerImage = editedImage
+        } else if let originalImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            selectedPickerImage = originalImage
+        }
+        if let selectedImage = selectedPickerImage {
+            DispatchQueue.main.async {
+                self.uploadToStorage(image: selectedImage, completion: { (imageURL) in
+                    self.sendMessageWithURL(imageURL: imageURL, image: selectedImage)
+                })
+            }
+        }
     }
-    if let selectedImage = selectedPickerImage {
-        DispatchQueue.main.async {
-            self.uploadToStorage(image: selectedImage, completion: { (imageURL) in
-                self.sendMessageWithURL(imageURL: imageURL, image: selectedImage)
+    
+    private func uploadToStorage(image: UIImage, completion: @escaping (_ imageURL: String) -> ()) {
+        let imageName = NSUUID().uuidString
+        let ref = Storage.storage().reference().child("message_inages").child(imageName)
+        
+        if let uploadData = UIImageJPEGRepresentation(image, 0.2) {
+            ref.putData(uploadData, metadata: nil, completion: { (metadata, error) in
+                if error != nil {
+                    print(error?.localizedDescription as Any)
+                }
+                if let imageURL = metadata?.downloadURL()?.absoluteString {
+                    completion(imageURL)
+                }
             })
         }
     }
-}
-
-    private func uploadToStorage(image: UIImage, completion: @escaping (_ imageURL: String) -> ()) {
-    let imageName = NSUUID().uuidString
-    let ref = Storage.storage().reference().child("message_inages").child(imageName)
     
-    if let uploadData = UIImageJPEGRepresentation(image, 0.2) {
-        ref.putData(uploadData, metadata: nil, completion: { (metadata, error) in
-            if error != nil {
-                print(error?.localizedDescription as Any)
-            }
-            if let imageURL = metadata?.downloadURL()?.absoluteString {
-                completion(imageURL)
-            }
-        })
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
     }
-}
-
-func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-    dismiss(animated: true, completion: nil)
-}
-
-func setUpKeyboardObservers() {
-    NotificationCenter.default.addObserver(self, selector: #selector(keyboardDidShow), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
-}
-
-@objc func keyboardDidShow() {
-    if messages.count > 0 {
-        let indexPath = IndexPath(item: messages.count - 1, section: 0)
-        collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
+    
+    func setUpKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardDidShow), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
     }
-}
-
-override func viewDidDisappear(_ animated: Bool) {
-    super.viewDidDisappear(animated)
     
-    NotificationCenter.default.removeObserver(self)
-}
-
-@objc func keyboardWillShow(notification: NSNotification) {
-    let keyboardFrame = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as! CGRect
-    let keyboardDuration = (notification.userInfo?[UIKeyboardAnimationDurationUserInfoKey] as AnyObject).doubleValue
-    
-    containerViewBottomAnchor?.constant = -keyboardFrame.height
-    UIView.animate(withDuration: keyboardDuration!) {
-        self.view.layoutIfNeeded()
-    }
-}
-
-@objc func keyboardWillHide(notification: NSNotification) {
-    let keyboardDuration = (notification.userInfo?[UIKeyboardAnimationDurationUserInfoKey] as AnyObject).doubleValue
-    
-    containerViewBottomAnchor?.constant = 0
-    UIView.animate(withDuration: keyboardDuration!) {
-        self.view.layoutIfNeeded()
-    }
-}
-
-@objc func sendButtonTap() {
-    let properties = ["text" : inputContainerView.inputTextField.text!]
-    sendMessagesWithProperties(properties: properties as [String : AnyObject])
-}
-
-private func sendMessageWithURL(imageURL: String, image: UIImage) {
-    let properties: [String:AnyObject] = ["imageURL" : imageURL as AnyObject, "imageWidth": image.size.width as AnyObject, "imageHeight": image.size.height as AnyObject]
-    sendMessagesWithProperties(properties: properties)
-}
-
-private func sendMessagesWithProperties(properties: [String:AnyObject]) {
-    let ref = Database.database().reference().child("messages")
-    let childRef = ref.childByAutoId()
-    
-    let toUserID = user!.id!
-    let fromUserID = Auth.auth().currentUser!.uid
-    let timestamp = Int(Date().timeIntervalSince1970)
-    var values = ["toUserID" : toUserID, "fromUserID" : fromUserID, "timestamp" : timestamp] as [String : Any]
-    
-    properties.forEach({values[$0] = $1})
-    
-    childRef.updateChildValues(values) { (error, ref) in
-        if error != nil {
-            print(error!.localizedDescription)
+    @objc func keyboardDidShow() {
+        if messages.count > 0 {
+            let indexPath = IndexPath(item: messages.count - 1, section: 0)
+            collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
         }
-        self.inputContainerView.inputTextField.text = nil
-        
-        let userMessageRef = Database.database().reference().child("user-messages").child(fromUserID).child(toUserID)
-        
-        let messageID = childRef.key
-        userMessageRef.updateChildValues([messageID: 1])
-        
-        let recipientUserMessagesRef = Database.database().reference().child("user-messages").child(toUserID).child(fromUserID)
-        recipientUserMessagesRef.updateChildValues([messageID: 1])
     }
-}
-
-var startingFrame: CGRect?
-var blackBackground: UIView?
-var startingImageView: UIImageView?
-
-func performZoomInForStartingImageView(startingImageView: UIImageView) {
-    self.startingImageView = startingImageView
-    self.startingImageView?.isHidden = true
     
-    startingFrame = startingImageView.superview?.convert(startingImageView.frame, to: nil)
-    
-    let zoomingImageView = UIImageView(frame: self.startingFrame!)
-    zoomingImageView.image = startingImageView.image
-    zoomingImageView.isUserInteractionEnabled = true
-    zoomingImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(zoomOut)))
-    
-    if let keyWindow = UIApplication.shared.keyWindow {
-        blackBackground = UIView(frame: keyWindow.frame)
-        blackBackground?.backgroundColor = .black
-        self.blackBackground?.alpha = 0
-        keyWindow.addSubview(blackBackground!)
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
         
-        keyWindow.addSubview(zoomingImageView)
-        
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
-            self.blackBackground?.alpha = 1
-            self.inputContainerView.alpha = 0
-            
-            let height = self.startingFrame!.height / self.startingFrame!.width * keyWindow.frame.width
-            
-            zoomingImageView.frame = CGRect(x: 0, y: 0, width: keyWindow.frame.width, height: height)
-            zoomingImageView.center = keyWindow.center
-        }, completion: { (completedl) in
-        })
+        NotificationCenter.default.removeObserver(self)
     }
-}
-
-@objc func zoomOut(tapGesture: UITapGestureRecognizer) {
-    if let zoomOutImageView = tapGesture.view {
-        zoomOutImageView.layer.cornerRadius = 16
-        zoomOutImageView.layer.masksToBounds = true
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        let keyboardFrame = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as! CGRect
+        let keyboardDuration = (notification.userInfo?[UIKeyboardAnimationDurationUserInfoKey] as AnyObject).doubleValue
         
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
-            zoomOutImageView.frame = self.startingFrame!
+        containerViewBottomAnchor?.constant = -keyboardFrame.height
+        UIView.animate(withDuration: keyboardDuration!) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc func keyboardWillHide(notification: NSNotification) {
+        let keyboardDuration = (notification.userInfo?[UIKeyboardAnimationDurationUserInfoKey] as AnyObject).doubleValue
+        
+        containerViewBottomAnchor?.constant = 0
+        UIView.animate(withDuration: keyboardDuration!) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc func sendButtonTap() {
+        if inputContainerView.inputTextField.text!.isEmpty {
+            presentSendButtonAlert()
+        } else {
+            let properties = ["text" : inputContainerView.inputTextField.text!]
+            sendMessagesWithProperties(properties: properties as [String : AnyObject])
+        }
+    }
+    
+    private func presentSendButtonAlert() {
+        let alert = UIAlertController(title: alertTitle, message: messageTitle, preferredStyle: .alert)
+        let action = UIAlertAction(title: actionTitle, style: .default) { (action) in
+            // Dismiss controller
+        }
+        alert.addAction(action)
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    private let alertTitle = "Womp 🤕"
+    private let messageTitle = "Please send a message"
+    private let actionTitle = "Okay"
+    
+    private func sendMessageWithURL(imageURL: String, image: UIImage) {
+        let properties: [String:AnyObject] = ["imageURL" : imageURL as AnyObject, "imageWidth": image.size.width as AnyObject, "imageHeight": image.size.height as AnyObject]
+        sendMessagesWithProperties(properties: properties)
+    }
+    
+    private func sendMessagesWithProperties(properties: [String:AnyObject]) {
+        let ref = Database.database().reference().child("messages")
+        let childRef = ref.childByAutoId()
+        
+        let toUserID = user!.id!
+        let fromUserID = Auth.auth().currentUser!.uid
+        let timestamp = Int(Date().timeIntervalSince1970)
+        var values = ["toUserID" : toUserID, "fromUserID" : fromUserID, "timestamp" : timestamp] as [String : Any]
+        
+        properties.forEach({values[$0] = $1})
+        
+        childRef.updateChildValues(values) { (error, ref) in
+            if error != nil {
+                print(error!.localizedDescription)
+            }
+            self.inputContainerView.inputTextField.text = nil
+            
+            let userMessageRef = Database.database().reference().child("user-messages").child(fromUserID).child(toUserID)
+            
+            let messageID = childRef.key
+            userMessageRef.updateChildValues([messageID: 1])
+            
+            let recipientUserMessagesRef = Database.database().reference().child("user-messages").child(toUserID).child(fromUserID)
+            recipientUserMessagesRef.updateChildValues([messageID: 1])
+        }
+    }
+    
+    var startingFrame: CGRect?
+    var blackBackground: UIView?
+    var startingImageView: UIImageView?
+    
+    func performZoomInForStartingImageView(startingImageView: UIImageView) {
+        self.startingImageView = startingImageView
+        self.startingImageView?.isHidden = true
+        
+        startingFrame = startingImageView.superview?.convert(startingImageView.frame, to: nil)
+        
+        let zoomingImageView = UIImageView(frame: self.startingFrame!)
+        zoomingImageView.image = startingImageView.image
+        zoomingImageView.isUserInteractionEnabled = true
+        zoomingImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(zoomOut)))
+        
+        if let keyWindow = UIApplication.shared.keyWindow {
+            blackBackground = UIView(frame: keyWindow.frame)
+            blackBackground?.backgroundColor = .black
             self.blackBackground?.alpha = 0
-            self.inputContainerView.alpha = 1
-        }, completion: { (completedl) in
-            zoomOutImageView.removeFromSuperview()
-            self.startingImageView?.isHidden = false
-        })
+            keyWindow.addSubview(blackBackground!)
+            
+            keyWindow.addSubview(zoomingImageView)
+            
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                self.blackBackground?.alpha = 1
+                self.inputContainerView.alpha = 0
+                
+                let height = self.startingFrame!.height / self.startingFrame!.width * keyWindow.frame.width
+                
+                zoomingImageView.frame = CGRect(x: 0, y: 0, width: keyWindow.frame.width, height: height)
+                zoomingImageView.center = keyWindow.center
+            }, completion: { (completedl) in
+            })
+        }
     }
-}
+    
+    @objc func zoomOut(tapGesture: UITapGestureRecognizer) {
+        if let zoomOutImageView = tapGesture.view {
+            zoomOutImageView.layer.cornerRadius = 16
+            zoomOutImageView.layer.masksToBounds = true
+            
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                zoomOutImageView.frame = self.startingFrame!
+                self.blackBackground?.alpha = 0
+                self.inputContainerView.alpha = 1
+            }, completion: { (completedl) in
+                zoomOutImageView.removeFromSuperview()
+                self.startingImageView?.isHidden = false
+            })
+        }
+    }
 }
 
 

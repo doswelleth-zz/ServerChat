@@ -18,17 +18,17 @@ class MessageTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .black
+        view.backgroundColor = .white
         
         // Customize nav bar items
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Exit", style: .plain, target: self, action: #selector(exitTap(sender:)))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "New", style: .plain, target: self, action: #selector(createNewMessage(sender:)))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logOutTap(sender:)))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Friends", style: .plain, target: self, action: #selector(createNewMessage(sender:)))
         
         navigationController?.hidesBarsOnTap = false
         navigationController?.hidesBarsOnSwipe = false
         navigationController?.navigationBar.isHidden = false
         navigationController?.navigationBar.prefersLargeTitles = false
-        navigationController?.navigationBar.barTintColor = UIColor.black
+        navigationController?.navigationBar.barTintColor = UIColor.white
         
         // Customize tableview items
         tableView.showsVerticalScrollIndicator = false
@@ -63,8 +63,6 @@ class MessageTableViewController: UITableViewController {
         }, withCancel: nil)
     }
     
-    var timer: Timer?
-    
     private func fetchMessageWithMessageID(messageID: String) {
         let messageReference = Database.database().reference().child("messages").child(messageID)
         messageReference.observe(.value, with: { (snapshot) in
@@ -78,6 +76,8 @@ class MessageTableViewController: UITableViewController {
             }
         }, withCancel: nil)
     }
+    
+    var timer: Timer?
     
     private func attemptToReloadTable() {
         self.timer?.invalidate()
@@ -94,14 +94,32 @@ class MessageTableViewController: UITableViewController {
         }
     }
     
-    @objc func exitTap(sender: UIButton) {
-        do {
-            try Auth.auth().signOut()
-        } catch let serverError {
-            print(serverError)
-        }
-        self.navigationController?.popToRootViewController(animated: true)
+    @objc func logOutTap(sender: UIButton) {
+        logOutAlert()
     }
+    
+    func logOutAlert() {
+        let alert = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .alert)
+        let logOut = UIAlertAction(title: logOutTitle, style: .default) { (action) in
+            do {
+                try Auth.auth().signOut()
+            } catch let serverError {
+                print(serverError)
+            }
+            self.navigationController?.popToRootViewController(animated: true)
+        }
+        let goBack = UIAlertAction(title: goBackTitle, style: .default) { (action) in
+            // Dismiss controller
+        }
+        alert.addAction(logOut)
+        alert.addAction(goBack)
+        present(alert, animated: true, completion: nil)
+    }
+    
+    private let alertTitle = "Confirm"
+    private let alertMessage = "Your messages will be deleted. Are you sure you want to permanently log out?"
+    private let logOutTitle = "Yes"
+    private let goBackTitle = "No"
     
     @objc func createNewMessage(sender: UIButton) {
         let newMessageTableViewController = NewMessageTableViewController()
@@ -111,7 +129,7 @@ class MessageTableViewController: UITableViewController {
     
     func checkIfServerIsLoggedIn() {
         if Auth.auth().currentUser?.uid == nil {
-            perform(#selector(exitTap(sender:)), with: nil, afterDelay: 0)
+            perform(#selector(logOutTap(sender:)), with: nil, afterDelay: 0)
         } else {
             setNavBarTitleToCurrentServer()
         }
@@ -171,8 +189,8 @@ class MessageTableViewController: UITableViewController {
         let serverNameLabel = UILabel()
         containerView.addSubview(serverNameLabel)
         
-        serverNameLabel.text = user.name
-        serverNameLabel.textColor = .white
+//        serverNameLabel.text = user.name
+        serverNameLabel.textColor = .black
         serverNameLabel.translatesAutoresizingMaskIntoConstraints = false
         
         serverNameLabel.leftAnchor.constraint(equalTo: serverImageView.rightAnchor, constant: 8).isActive = true
@@ -206,7 +224,7 @@ class MessageTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
+        return 100
     }
     
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -226,8 +244,8 @@ class MessageTableViewController: UITableViewController {
         
         let message = messages[indexPath.row]
         cell.message = message
-        cell.backgroundColor = .black
-        cell.textLabel?.textColor = .white
+        cell.backgroundColor = .white
+        cell.textLabel?.textColor = .black
         cell.selectionStyle = .none
         
         return cell

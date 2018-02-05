@@ -13,7 +13,7 @@ class UsersCell: UITableViewCell {
     
     let serverImageView : UIImageView = {
         let imageView = UIImageView()
-        imageView.layer.cornerRadius = 25
+        imageView.layer.cornerRadius = 37.5
         imageView.layer.masksToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -22,7 +22,7 @@ class UsersCell: UITableViewCell {
     let serverNameLabel : UILabel = {
         let label = UILabel()
         label.textAlignment = .left
-        label.textColor = .white
+        label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 17)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -31,7 +31,7 @@ class UsersCell: UITableViewCell {
     let serverDetailLabel : UILabel = {
         let label = UILabel()
         label.textAlignment = .left
-        label.textColor = .white
+        label.textColor = .lightGray
         label.font = UIFont.systemFont(ofSize: 14)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -40,7 +40,7 @@ class UsersCell: UITableViewCell {
     let serverTimeLabel : UILabel = {
         let label = UILabel()
         label.textAlignment = .right
-        label.textColor = .white
+        label.textColor = .black
         label.font = UIFont.systemFont(ofSize: 14)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -54,7 +54,8 @@ class UsersCell: UITableViewCell {
             if let seconds = message?.timestamp?.doubleValue {
                 let timestampDate = Date(timeIntervalSince1970: seconds)
                 let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "hh:mm:ss a"
+                dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                dateFormatter.dateFormat = "h:mm a"
                 serverTimeLabel.text = dateFormatter.string(from: timestampDate)
             }
         }
@@ -99,12 +100,12 @@ class UsersCell: UITableViewCell {
         
         addConstraints([NSLayoutConstraint(item: serverImageView, attribute: .centerY, relatedBy: .equal, toItem: margin, attribute: .centerY, multiplier: 1, constant: 0)])
         
-        addConstraints([NSLayoutConstraint(item: serverImageView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 50)])
+        addConstraints([NSLayoutConstraint(item: serverImageView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 75)])
         
-        addConstraints([NSLayoutConstraint(item: serverImageView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 50)])
+        addConstraints([NSLayoutConstraint(item: serverImageView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 75)])
         
         // Server name label constraints
-        addConstraints([NSLayoutConstraint(item: serverNameLabel, attribute: .left, relatedBy: .equal, toItem: margin, attribute: .leftMargin, multiplier: 1, constant: 65)])
+        addConstraints([NSLayoutConstraint(item: serverNameLabel, attribute: .left, relatedBy: .equal, toItem: margin, attribute: .leftMargin, multiplier: 1, constant: 91)])
         
         addConstraints([NSLayoutConstraint(item: serverNameLabel, attribute: .centerY, relatedBy: .equal, toItem: margin, attribute: .centerY, multiplier: 1, constant: 0)])
         
@@ -122,7 +123,7 @@ class UsersCell: UITableViewCell {
         addConstraints([NSLayoutConstraint(item: serverTimeLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 16)])
         
         // Server detail label constraints
-        addConstraints([NSLayoutConstraint(item: serverDetailLabel, attribute: .left, relatedBy: .equal, toItem: margin, attribute: .leftMargin, multiplier: 1, constant: 65)])
+        addConstraints([NSLayoutConstraint(item: serverDetailLabel, attribute: .left, relatedBy: .equal, toItem: margin, attribute: .leftMargin, multiplier: 1, constant: 91)])
         
         addConstraints([NSLayoutConstraint(item: serverDetailLabel, attribute: .bottom, relatedBy: .equal, toItem: serverNameLabel, attribute: .bottom, multiplier: 1, constant: 10)])
         

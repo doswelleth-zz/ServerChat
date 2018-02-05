@@ -36,10 +36,10 @@ extension UIImageView {
 }
 
 
-let now = NSDate()
-let pastDate = NSDate(timeIntervalSinceNow: -60)
+let now = Date()
+let pastDate = Date(timeIntervalSinceNow: -60)
 
-extension NSDate {
+extension Date {
     func timeAgoDisplay() -> String {
         let secondsAgo = Int(Date().timeIntervalSince(self as Date))
         

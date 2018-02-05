@@ -10,24 +10,23 @@ import UIKit
 import Firebase
 
 private let serverChatTitle = "Server Chat"
-private let appColor = UIColor.black
 
 class StarterViewController: UIViewController {
     
     let serverChat : UILabel = {
         let label = UILabel()
         label.text = serverChatTitle
-        label.textColor = .white
+        label.textColor = UIColor.appColor()
         label.textAlignment = .center
         label.font = UIFont.boldSystemFont(ofSize: 40)
-        label.backgroundColor = appColor
+        label.backgroundColor = .white
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     lazy var serverLogo : UIImageView = {
         let image = UIImageView()
-        image.image = UIImage(named: "Drink")
+        image.image = UIImage(named: "Icon")
         image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(imageTap(sender:))))
         image.isUserInteractionEnabled = true
         image.translatesAutoresizingMaskIntoConstraints = false
@@ -39,10 +38,11 @@ class StarterViewController: UIViewController {
             let destination = MessageTableViewController()
             self.navigationController?.pushViewController(destination, animated: true)
         } else {
-        let destination = LoginViewController()
+        let destination = JoinViewController()
         self.navigationController?.pushViewController(destination, animated: true)
         }
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -55,7 +55,7 @@ class StarterViewController: UIViewController {
 
     func setUpViews() {
         
-        view.backgroundColor = appColor
+        view.backgroundColor = .white
         
         view.addSubview(serverChat)
         view.addSubview(serverLogo)

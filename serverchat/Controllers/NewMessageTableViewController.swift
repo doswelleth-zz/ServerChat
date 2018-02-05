@@ -9,22 +9,53 @@
 import UIKit
 import Firebase
 
+private let navigationTitle = "Find Servers"
 private let reuseIdentifier = "reuseIdentifier"
 
 class NewMessageTableViewController: UITableViewController {
     
     var users = [User]()
+    var filteredUsers = [User]()
+
+    let searchController = UISearchController(searchResultsController: nil)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .black
+        view.backgroundColor = .white
+
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "←", style: .plain, target: self, action: #selector(cancelButtonTap(sender:)))
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(cancelButtonTap(sender:)))
+        // Setup the Search Controller
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search"
+        searchController.hidesNavigationBarDuringPresentation = false
         
+        navigationItem.titleView = searchController.searchBar
+//        navigationItem.searchController = searchController
+        definesPresentationContext = true
+        
+        tableView.showsVerticalScrollIndicator = false
         tableView.register(UsersCell.self, forCellReuseIdentifier: reuseIdentifier)
         
         fetchUser()
+    }
+    
+    func searchBarIsEmpty() -> Bool {
+        return searchController.searchBar.text?.isEmpty ?? true
+    }
+    
+    func filterContentForSearchText(_ searchText: String) {
+        filteredUsers = users.filter({( user : User) -> Bool in
+            return user.name!.lowercased().contains(searchText.lowercased())
+        })
+        
+        tableView.reloadData()
+    }
+    
+    func isFiltering() -> Bool {
+        return searchController.isActive && !searchBarIsEmpty()
     }
     
     @objc func cancelButtonTap(sender: UIButton) {
@@ -49,15 +80,26 @@ class NewMessageTableViewController: UITableViewController {
     var messagesTableViewController: MessageTableViewController?
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let user = self.users[indexPath.row]
-        self.messagesTableViewController?.serverChatTap(user: user)
+        let user : User
+        
+        if isFiltering() {
+            user = filteredUsers[indexPath.row]
+            self.messagesTableViewController?.serverChatTap(user: user)
+        } else {
+            user = users[indexPath.row]
+            self.messagesTableViewController?.serverChatTap(user: user)
+        }
+//        let user = self.users[indexPath.row]
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
+        return 100
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if isFiltering() {
+            return filteredUsers.count
+        }
         return users.count
     }
     
@@ -65,7 +107,14 @@ class NewMessageTableViewController: UITableViewController {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as! UsersCell
         
-        let user = users[indexPath.row]
+        let user : User
+        
+        if isFiltering() {
+            user = filteredUsers[indexPath.row]
+        } else {
+            user = users[indexPath.row]
+        }
+        
         cell.serverNameLabel.text = user.name
         cell.serverImageView.contentMode = .scaleAspectFill
         
@@ -73,8 +122,8 @@ class NewMessageTableViewController: UITableViewController {
             cell.serverImageView.cacheImage(urlString: serverImageURL)
         }
         
-        cell.backgroundColor = .black
-        cell.textLabel?.textColor = .white
+        cell.backgroundColor = .white
+        cell.textLabel?.textColor = .black
         cell.selectionStyle = .none
         
         return cell
@@ -86,4 +135,11 @@ class NewMessageTableViewController: UITableViewController {
         self.navigationController?.pushViewController(destination, animated: true)
     }
     
+}
+
+extension NewMessageTableViewController: UISearchResultsUpdating {
+    // MARK: - UISearchResultsUpdating Delegate
+    func updateSearchResults(for searchController: UISearchController) {
+        filterContentForSearchText(searchController.searchBar.text!)
+    }
 }

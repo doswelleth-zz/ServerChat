@@ -91,7 +91,6 @@ class ServerChatCell: UICollectionViewCell {
         }
     }
     
-    
     var player : AVPlayer?
     var playerLayer : AVPlayerLayer?
     
@@ -99,8 +98,10 @@ class ServerChatCell: UICollectionViewCell {
         if let videoURLString = message?.videoURL, let url = URL(string: videoURLString) {
             player = AVPlayer(url: url)
             playerLayer = AVPlayerLayer(player: player)
+            playerLayer?.videoGravity = .resizeAspectFill
             playerLayer?.frame = bubbleView.bounds
             bubbleView.layer.addSublayer(playerLayer!)
+            
             player?.play()
             activityIndicatorView.startAnimating()
             playButton.isHidden = true
@@ -115,7 +116,7 @@ class ServerChatCell: UICollectionViewCell {
     }
     
     func setUpViews() {
-        backgroundColor = .black
+        backgroundColor = .white
         
         addSubview(bubbleView)
         addSubview(chatTextView)

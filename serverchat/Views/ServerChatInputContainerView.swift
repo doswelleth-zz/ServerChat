@@ -9,7 +9,7 @@
 import UIKit
 
 private let sendButtonTitle = "Send"
-private let inputTextFieldPlaceholder = "New message"
+private let inputTextFieldPlaceholder = "Create a new message"
 
 class ServerChatInputContainerView: UIView, UITextFieldDelegate {
     
@@ -24,9 +24,9 @@ class ServerChatInputContainerView: UIView, UITextFieldDelegate {
     lazy var inputTextField : UITextField = {
         let textField = UITextField()
         textField.clearsOnBeginEditing = true
-        textField.attributedPlaceholder = NSAttributedString(string: inputTextFieldPlaceholder, attributes: [NSAttributedStringKey.foregroundColor : UIColor.white])
-        textField.textColor = .white
-        textField.tintColor = .white
+        textField.attributedPlaceholder = NSAttributedString(string: inputTextFieldPlaceholder, attributes: [NSAttributedStringKey.foregroundColor : UIColor.appColor()])
+        textField.textColor = UIColor.appColor()
+        textField.tintColor = UIColor.appColor()
         textField.delegate = self
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
@@ -37,6 +37,7 @@ class ServerChatInputContainerView: UIView, UITextFieldDelegate {
         button.setImage(UIImage(named: "Upload"), for: .normal)
         button.layer.cornerRadius = 22
         button.layer.masksToBounds = true
+        button.adjustsImageWhenHighlighted = false
         button.isUserInteractionEnabled = true
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -45,7 +46,8 @@ class ServerChatInputContainerView: UIView, UITextFieldDelegate {
     let sendButton : UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(sendButtonTitle, for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(UIColor.appColor(), for: .normal)
+        button.layer.backgroundColor = UIColor.white.cgColor
         button.isUserInteractionEnabled = true
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -53,7 +55,7 @@ class ServerChatInputContainerView: UIView, UITextFieldDelegate {
     
     let separatorLineView : UIView = {
         let view = UIView()
-        view.backgroundColor = .white
+        view.backgroundColor = .gray
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -71,7 +73,7 @@ class ServerChatInputContainerView: UIView, UITextFieldDelegate {
 
     func setUpContainerView() {
         
-        backgroundColor = .black
+        backgroundColor = .white
     
         // Upload button constraints
         addSubview(uploadImageButton)
