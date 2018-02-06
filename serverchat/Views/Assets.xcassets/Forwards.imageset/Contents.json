@@ -2,15 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "Code Profile.png",
+      "filename" : "server_chat_find_servers.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
+      "filename" : "server_chat_find_servers-1.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
+      "filename" : "server_chat_find_servers-2.png",
       "scale" : "3x"
     }
   ],

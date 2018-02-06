@@ -29,7 +29,7 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         view.backgroundColor = .white
         
         // Customize nav bar items
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(backTap(sender:)))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "🏃‍♂️", style: .plain, target: self, action: #selector(backTap(sender:)))
         
         self.collectionView?.alwaysBounceVertical = true
         self.collectionView?.backgroundColor = .white
@@ -315,16 +315,26 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
     
     private func presentSendButtonAlert() {
         let alert = UIAlertController(title: alertTitle, message: messageTitle, preferredStyle: .alert)
-        let action = UIAlertAction(title: actionTitle, style: .default) { (action) in
+        let okay = UIAlertAction(title: okayTitle, style: .default) { (action) in
             // Dismiss controller
         }
-        alert.addAction(action)
+        let goBack = UIAlertAction(title: goBackTitle, style: .default) { (action) in
+            let viewControllers = self.navigationController!.viewControllers as [UIViewController]
+            for aViewController:UIViewController in viewControllers {
+                if aViewController.isKind(of: MessageTableViewController.self) {
+                    _ = self.navigationController?.popToViewController(aViewController, animated: true)
+                }
+            }
+        }
+        alert.addAction(okay)
+        alert.addAction(goBack)
         self.present(alert, animated: true, completion: nil)
     }
     
     private let alertTitle = "Womp 🤕"
-    private let messageTitle = "Please send a message"
-    private let actionTitle = "Okay"
+    private let messageTitle = "Please create a message"
+    private let okayTitle = "Okay"
+    private let goBackTitle = "Go Back"
     
     private func sendMessageWithURL(imageURL: String, image: UIImage) {
         let properties: [String:AnyObject] = ["imageURL" : imageURL as AnyObject, "imageWidth": image.size.width as AnyObject, "imageHeight": image.size.height as AnyObject]
@@ -409,10 +419,8 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
             })
         }
     }
+    
 }
-
-
-
 
 
 

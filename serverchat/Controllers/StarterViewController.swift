@@ -10,15 +10,27 @@ import UIKit
 import Firebase
 
 private let serverChatTitle = "Server Chat"
+private let serverChatSubtitleTitle = "A Place Where Servers Chat"
 
 class StarterViewController: UIViewController {
-    
+        
     let serverChat : UILabel = {
         let label = UILabel()
         label.text = serverChatTitle
         label.textColor = UIColor.appColor()
         label.textAlignment = .center
         label.font = UIFont.boldSystemFont(ofSize: 40)
+        label.backgroundColor = .white
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    let serverChatSubtitle : UILabel = {
+        let label = UILabel()
+        label.text = serverChatSubtitleTitle
+        label.textColor = .black
+        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 16)
         label.backgroundColor = .white
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -38,8 +50,8 @@ class StarterViewController: UIViewController {
             let destination = MessageTableViewController()
             self.navigationController?.pushViewController(destination, animated: true)
         } else {
-        let destination = JoinViewController()
-        self.navigationController?.pushViewController(destination, animated: true)
+            let destination = JoinViewController()
+            self.navigationController?.pushViewController(destination, animated: true)
         }
     }
     
@@ -52,12 +64,13 @@ class StarterViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.navigationBar.isHidden = true
     }
-
+    
     func setUpViews() {
         
         view.backgroundColor = .white
         
         view.addSubview(serverChat)
+        view.addSubview(serverChatSubtitle)
         view.addSubview(serverLogo)
         
         let margin = view.layoutMarginsGuide
@@ -70,6 +83,15 @@ class StarterViewController: UIViewController {
         view.addConstraints([NSLayoutConstraint(item: serverChat, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 300)])
         
         view.addConstraints([NSLayoutConstraint(item: serverChat, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 30)])
+        
+        // Server chat subtitle constraints
+        view.addConstraints([NSLayoutConstraint(item: serverChatSubtitle, attribute: .centerX, relatedBy: .equal, toItem: margin, attribute: .centerX, multiplier: 1, constant: 0)])
+        
+        view.addConstraints([NSLayoutConstraint(item: serverChatSubtitle, attribute: .bottom, relatedBy: .equal, toItem: serverChat, attribute: .bottom, multiplier: 1, constant: 50)])
+        
+        view.addConstraints([NSLayoutConstraint(item: serverChatSubtitle, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 300)])
+        
+        view.addConstraints([NSLayoutConstraint(item: serverChatSubtitle, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20)])
         
         // Server logo constraints
         view.addConstraints([NSLayoutConstraint(item: serverLogo, attribute: .centerX, relatedBy: .equal, toItem: margin, attribute: .centerX, multiplier: 1, constant: 0)])
@@ -84,4 +106,7 @@ class StarterViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
+    
 }
+
+

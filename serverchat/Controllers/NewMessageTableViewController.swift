@@ -9,7 +9,6 @@
 import UIKit
 import Firebase
 
-private let navigationTitle = "Find Servers"
 private let reuseIdentifier = "reuseIdentifier"
 
 class NewMessageTableViewController: UITableViewController {
@@ -24,16 +23,15 @@ class NewMessageTableViewController: UITableViewController {
         
         view.backgroundColor = .white
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "←", style: .plain, target: self, action: #selector(cancelButtonTap(sender:)))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "🏃‍♀️", style: .plain, target: self, action: #selector(backButtonTap(sender:)))
         
         // Setup the Search Controller
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search"
+        searchController.searchBar.placeholder = "Find Servers"
         searchController.hidesNavigationBarDuringPresentation = false
         
         navigationItem.titleView = searchController.searchBar
-//        navigationItem.searchController = searchController
         definesPresentationContext = true
         
         tableView.showsVerticalScrollIndicator = false
@@ -58,7 +56,7 @@ class NewMessageTableViewController: UITableViewController {
         return searchController.isActive && !searchBarIsEmpty()
     }
     
-    @objc func cancelButtonTap(sender: UIButton) {
+    @objc func backButtonTap(sender: UIButton) {
         self.navigationController?.popViewController(animated: true)
     }
     
@@ -89,7 +87,6 @@ class NewMessageTableViewController: UITableViewController {
             user = users[indexPath.row]
             self.messagesTableViewController?.serverChatTap(user: user)
         }
-//        let user = self.users[indexPath.row]
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

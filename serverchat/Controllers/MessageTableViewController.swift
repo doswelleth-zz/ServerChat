@@ -21,8 +21,9 @@ class MessageTableViewController: UITableViewController {
         view.backgroundColor = .white
         
         // Customize nav bar items
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logOutTap(sender:)))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Friends", style: .plain, target: self, action: #selector(createNewMessage(sender:)))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "👋", style: .plain, target: self, action: #selector(logOutTap(sender:)))
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "🕵️‍♂️", style: .plain, target: self, action: #selector(findServersTap(sender:)))
         
         navigationController?.hidesBarsOnTap = false
         navigationController?.hidesBarsOnSwipe = false
@@ -116,12 +117,12 @@ class MessageTableViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    private let alertTitle = "Confirm"
-    private let alertMessage = "Your messages will be deleted. Are you sure you want to permanently log out?"
+    private let alertTitle = "Confirm 😮"
+    private let alertMessage = "Are you sure you want to log out?"
     private let logOutTitle = "Yes"
     private let goBackTitle = "No"
     
-    @objc func createNewMessage(sender: UIButton) {
+    @objc func findServersTap(sender: UIButton) {
         let newMessageTableViewController = NewMessageTableViewController()
         newMessageTableViewController.messagesTableViewController = self
         self.navigationController?.pushViewController(newMessageTableViewController, animated: true)
@@ -189,7 +190,7 @@ class MessageTableViewController: UITableViewController {
         let serverNameLabel = UILabel()
         containerView.addSubview(serverNameLabel)
         
-//        serverNameLabel.text = user.name
+        serverNameLabel.text = user.name
         serverNameLabel.textColor = .black
         serverNameLabel.translatesAutoresizingMaskIntoConstraints = false
         
