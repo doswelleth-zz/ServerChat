@@ -24,7 +24,7 @@ class ServerChatInputContainerView: UIView, UITextFieldDelegate {
     lazy var inputTextField : UITextField = {
         let textField = UITextField()
         textField.clearsOnBeginEditing = true
-        textField.attributedPlaceholder = NSAttributedString(string: inputTextFieldPlaceholder, attributes: [NSAttributedStringKey.foregroundColor : UIColor.appColor()])
+        textField.attributedPlaceholder = NSAttributedString(string: inputTextFieldPlaceholder, attributes: [NSAttributedStringKey.foregroundColor : UIColor.lightGray])
         textField.textColor = UIColor.appColor()
         textField.tintColor = UIColor.appColor()
         textField.delegate = self

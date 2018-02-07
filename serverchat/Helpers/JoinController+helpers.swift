@@ -14,6 +14,7 @@ extension JoinViewController: UIImagePickerControllerDelegate, UINavigationContr
     
     // Log in new server with credentials
     @objc func joinTap(sender:UIButton) {
+        presentJoinAlert()
         
         guard let email = emailTextField.text, let password = passwordTextField.text, let name = nameTextField.text else  { return }
         
@@ -38,6 +39,17 @@ extension JoinViewController: UIImagePickerControllerDelegate, UINavigationContr
                     }
                 })
             }
+        }
+    }
+    
+    func presentJoinAlert() {
+        if nameTextField.text!.isEmpty || emailTextField.text!.isEmpty || passwordTextField.text!.isEmpty {
+            let alert = UIAlertController(title: "Whoops 😮", message: "Please enter all fields correctly", preferredStyle: .alert)
+            let action = UIAlertAction(title: "Okay", style: .default, handler: { (action) in
+                // Dismiss controller
+            })
+            alert.addAction(action)
+            self.present(alert, animated: true, completion: nil)
         }
     }
     

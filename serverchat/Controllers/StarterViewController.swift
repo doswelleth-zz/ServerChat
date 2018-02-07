@@ -11,6 +11,7 @@ import Firebase
 
 private let serverChatTitle = "Server Chat"
 private let serverChatSubtitleTitle = "A Place Where Servers Chat"
+private let signInButtonText = "Sign In"
 
 class StarterViewController: UIViewController {
         
@@ -36,16 +37,26 @@ class StarterViewController: UIViewController {
         return label
     }()
     
-    lazy var serverLogo : UIImageView = {
+    let serverLogo : UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: "Icon")
-        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(imageTap(sender:))))
-        image.isUserInteractionEnabled = true
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
     
-    @objc func imageTap(sender: UIButton) {
+    let signInButton: UIButton = {
+        let button = UIButton(type: .system) as UIButton
+        button.setTitle(signInButtonText, for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
+        button.layer.cornerRadius = 25
+        button.backgroundColor = UIColor.appColor()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(signInButtonTap(sender:)), for: .touchUpInside)
+        return button
+    }()
+    
+    @objc func signInButtonTap(sender: UIButton) {
         if Auth.auth().currentUser?.uid != nil {
             let destination = MessageTableViewController()
             self.navigationController?.pushViewController(destination, animated: true)
@@ -72,6 +83,7 @@ class StarterViewController: UIViewController {
         view.addSubview(serverChat)
         view.addSubview(serverChatSubtitle)
         view.addSubview(serverLogo)
+        view.addSubview(signInButton)
         
         let margin = view.layoutMarginsGuide
         
@@ -101,6 +113,15 @@ class StarterViewController: UIViewController {
         view.addConstraints([NSLayoutConstraint(item: serverLogo, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 200)])
         
         view.addConstraints([NSLayoutConstraint(item: serverLogo, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 200)])
+        
+        // Sign in button constraints
+        view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .centerX, relatedBy: .equal, toItem: margin, attribute: .centerX, multiplier: 1, constant: 0)])
+        
+        view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .bottom, relatedBy: .equal, toItem: serverLogo, attribute: .bottom, multiplier: 1, constant: 100)])
+        
+        view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 125)])
+        
+        view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 50)])
     }
     
     override func didReceiveMemoryWarning() {

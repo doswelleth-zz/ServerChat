@@ -17,6 +17,7 @@
 		A693AB9F201C82BB00471BC2 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = A693AB9E201C82BB00471BC2 /* Message.swift */; };
 		A6AE845520265F23005BCE83 /* JoinViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AE845420265F23005BCE83 /* JoinViewController.swift */; };
 		A6AE84572026700B005BCE83 /* JoinController+helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AE84562026700B005BCE83 /* JoinController+helpers.swift */; };
+		A6AE8463202A95F9005BCE83 /* SignInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AE8462202A95F9005BCE83 /* SignInViewController.swift */; };
 		A6CE38B3201DF49600474FBC /* ServerChatCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6CE38B2201DF49600474FBC /* ServerChatCell.swift */; };
 		A6CE38B52025294400474FBC /* ServerChatInputContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6CE38B42025294300474FBC /* ServerChatInputContainerView.swift */; };
 		A6DA4BF7201441DB003522D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6DA4BF6201441DB003522D4 /* AppDelegate.swift */; };
@@ -62,6 +63,7 @@
 		A693AB9E201C82BB00471BC2 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		A6AE845420265F23005BCE83 /* JoinViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinViewController.swift; sourceTree = "<group>"; };
 		A6AE84562026700B005BCE83 /* JoinController+helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JoinController+helpers.swift"; sourceTree = "<group>"; };
+		A6AE8462202A95F9005BCE83 /* SignInViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewController.swift; sourceTree = "<group>"; };
 		A6CE38B2201DF49600474FBC /* ServerChatCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerChatCell.swift; sourceTree = "<group>"; };
 		A6CE38B42025294300474FBC /* ServerChatInputContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerChatInputContainerView.swift; sourceTree = "<group>"; };
 		A6CE38B620253FAD00474FBC /* serverchat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = serverchat.entitlements; sourceTree = "<group>"; };
@@ -225,6 +227,7 @@
 			children = (
 				A6FB3F9A2015E3AF00057EB4 /* StarterViewController.swift */,
 				A6AE845420265F23005BCE83 /* JoinViewController.swift */,
+				A6AE8462202A95F9005BCE83 /* SignInViewController.swift */,
 				A6DA4C2D20145193003522D4 /* MessageTableViewController.swift */,
 				A62D8C6F2016E48D001D1F6B /* NewMessageTableViewController.swift */,
 				A68855F3201AE0C400B14B52 /* ServerChatController.swift */,
@@ -313,6 +316,9 @@
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 0;
 							};
 						};
 					};
@@ -554,6 +560,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A6AE8463202A95F9005BCE83 /* SignInViewController.swift in Sources */,
 				A6DA4C2E20145193003522D4 /* MessageTableViewController.swift in Sources */,
 				A68855F020187E2800B14B52 /* Extensions.swift in Sources */,
 				A6FB3F9B2015E3AF00057EB4 /* StarterViewController.swift in Sources */,
