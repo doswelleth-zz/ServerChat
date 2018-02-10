@@ -74,7 +74,7 @@ class NewMessageTableViewController: UITableViewController {
             }
         }
     }
-    
+
     var messagesTableViewController: MessageTableViewController?
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

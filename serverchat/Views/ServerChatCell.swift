@@ -8,12 +8,13 @@
 
 import UIKit
 import AVFoundation
+import Firebase
 
 class ServerChatCell: UICollectionViewCell {
     
     var serverChatController : ServerChatController?
     var message : Message?
-    
+        
     let activityIndicatorView : UIActivityIndicatorView = {
         let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
         indicatorView.hidesWhenStopped = true
@@ -49,12 +50,14 @@ class ServerChatCell: UICollectionViewCell {
         return textView
     }()
     
-    let serverImageView: UIImageView = {
+    lazy var serverImageView: UIImageView = {
         let image = UIImageView()
         image.layer.cornerRadius = 16
         image.layer.masksToBounds = true
         image.contentMode = .scaleAspectFill
+        image.isUserInteractionEnabled = true
         image.translatesAutoresizingMaskIntoConstraints = false
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(blockTap)))
         return image
     }()
     
@@ -91,6 +94,41 @@ class ServerChatCell: UICollectionViewCell {
         }
     }
     
+    @objc func blockTap(tapGesture: UITapGestureRecognizer) {
+        presentBlockAlert()
+    }
+    
+    func presentBlockAlert() {
+        let alert = UIAlertController(title: blockAlertTitle, message: blockMessageTitle, preferredStyle: .actionSheet)
+        let block = UIAlertAction(title: blockActionTitleOne, style: .destructive) { (action) in
+            self.blockUser()
+            self.serverChatController?.navigationController?.popViewController(animated: true)
+        }
+        let forget = UIAlertAction(title: blockActionTitleTwo, style: .default) { (action) in
+            // dismiss alert
+        }
+        alert.addAction(block)
+        alert.addAction(forget)
+        serverChatController?.present(alert, animated: true, completion: nil)
+    }
+    
+    private let blockAlertTitle = "Block this server?"
+    private let blockMessageTitle = "This server will no longer send you messages."
+    private let blockActionTitleOne = "Block"
+    private let blockActionTitleTwo = "Forget"
+
+    func blockUser() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        if let chatPartnerID = message?.chatPartnerID() {
+            Database.database().reference().child("user-messages").child(uid).child(chatPartnerID).removeValue(completionBlock: { (error, ref) in
+                if error != nil {
+                    print(error?.localizedDescription as Any)
+                }
+            })
+        }
+    }
+
     var player : AVPlayer?
     var playerLayer : AVPlayerLayer?
     

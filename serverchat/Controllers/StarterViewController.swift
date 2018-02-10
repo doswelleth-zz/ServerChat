@@ -12,6 +12,7 @@ import Firebase
 private let serverChatTitle = "Server Chat"
 private let serverChatSubtitleTitle = "A Place Where Servers Chat"
 private let signInButtonText = "Sign In"
+private let eulaButtonTitle = "License Agreement"
 
 class StarterViewController: UIViewController {
         
@@ -56,6 +57,15 @@ class StarterViewController: UIViewController {
         return button
     }()
     
+    let eulaAgreement : UIButton = {
+        let button = UIButton(type: .system) as UIButton
+        button.setTitle(eulaButtonTitle, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(eulaTap(sender:)), for: .touchUpInside)
+        return button
+    }()
+    
     @objc func signInButtonTap(sender: UIButton) {
         if Auth.auth().currentUser?.uid != nil {
             let destination = MessageTableViewController()
@@ -64,6 +74,11 @@ class StarterViewController: UIViewController {
             let destination = JoinViewController()
             self.navigationController?.pushViewController(destination, animated: true)
         }
+    }
+    
+    @objc func eulaTap(sender: UIButton) {
+        let destination = EulaViewController()
+        self.navigationController?.pushViewController(destination, animated: true)
     }
     
     override func viewDidLoad() {
@@ -84,6 +99,7 @@ class StarterViewController: UIViewController {
         view.addSubview(serverChatSubtitle)
         view.addSubview(serverLogo)
         view.addSubview(signInButton)
+        view.addSubview(eulaAgreement)
         
         let margin = view.layoutMarginsGuide
         
@@ -122,6 +138,15 @@ class StarterViewController: UIViewController {
         view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 125)])
         
         view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 50)])
+        
+        // Eula Agreement button constraints
+        view.addConstraints([NSLayoutConstraint(item: eulaAgreement, attribute: .centerX, relatedBy: .equal, toItem: margin, attribute: .centerX, multiplier: 1, constant: 0)])
+        
+        view.addConstraints([NSLayoutConstraint(item: eulaAgreement, attribute: .bottom, relatedBy: .equal, toItem: signInButton, attribute: .bottom, multiplier: 1, constant: 30)])
+        
+        view.addConstraints([NSLayoutConstraint(item: eulaAgreement, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 200)])
+        
+        view.addConstraints([NSLayoutConstraint(item: eulaAgreement, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 17)])
     }
     
     override func didReceiveMemoryWarning() {
