@@ -94,14 +94,14 @@ class ServerChatCell: UICollectionViewCell {
         }
     }
     
-    @objc func blockTap(tapGesture: UITapGestureRecognizer) {
+    @objc func blockTap() {
         presentBlockAlert()
     }
     
     func presentBlockAlert() {
         let alert = UIAlertController(title: blockAlertTitle, message: blockMessageTitle, preferredStyle: .actionSheet)
         let block = UIAlertAction(title: blockActionTitleOne, style: .destructive) { (action) in
-            self.blockUser()
+            self.addToListOfBlockedUsers()
             self.serverChatController?.navigationController?.popViewController(animated: true)
         }
         let forget = UIAlertAction(title: blockActionTitleTwo, style: .default) { (action) in
@@ -116,19 +116,21 @@ class ServerChatCell: UICollectionViewCell {
     private let blockMessageTitle = "This server will no longer send you messages."
     private let blockActionTitleOne = "Block"
     private let blockActionTitleTwo = "Forget"
-
-    func blockUser() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+    
+    func addToListOfBlockedUsers() {
+        guard let user = message?.chatPartnerID() else { return }
         
-        if let chatPartnerID = message?.chatPartnerID() {
-            Database.database().reference().child("user-messages").child(uid).child(chatPartnerID).removeValue(completionBlock: { (error, ref) in
-                if error != nil {
-                    print(error?.localizedDescription as Any)
-                }
+        var blockedUsers : [String] = [user]
+        
+        for blockedUser in blockedUsers {
+            Database.database().reference().child("user").observe(.childRemoved, with: { (snapshot) in
+                //
             })
+            blockedUsers.append(blockedUser)
+            print(blockedUser)
         }
     }
-
+    
     var player : AVPlayer?
     var playerLayer : AVPlayerLayer?
     

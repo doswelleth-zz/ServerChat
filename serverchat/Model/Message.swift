@@ -23,7 +23,7 @@ public class Message : NSObject {
     func chatPartnerID() -> String? {
         return (fromUserID == Auth.auth().currentUser?.uid ? toUserID : fromUserID)!
     }
-    
+
     init(dictionary: [String:AnyObject]) {
         super.init()
         
