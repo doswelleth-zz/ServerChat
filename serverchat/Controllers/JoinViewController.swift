@@ -20,6 +20,15 @@ class JoinViewController: UIViewController {
     
     var messagesTableViewController: MessageTableViewController?
     
+    let backButton: UIButton = {
+        let button = UIButton(type: .system) as UIButton
+        button.setTitle("🏃‍♂️", for: .normal)
+        button.isUserInteractionEnabled = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(backButtonTap), for: .touchUpInside)
+        return button
+    }()
+    
     lazy var serverImage : UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: "Preview")
@@ -78,22 +87,6 @@ class JoinViewController: UIViewController {
         return button
     }()
     
-    let signInButton: UIButton = {
-        let button = UIButton(type: .system) as UIButton
-        button.setTitle(signInHere, for: .normal)
-        button.setTitleColor(UIColor.appColor(), for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
-        button.backgroundColor = .white
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(signInButtonTap(sender:)), for: .touchUpInside)
-        return button
-    }()
-    
-    @objc func signInButtonTap(sender: UIButton) {
-        let destination = SignInViewController()
-        self.navigationController?.pushViewController(destination, animated: true)
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -104,20 +97,34 @@ class JoinViewController: UIViewController {
         self.navigationController?.navigationBar.isHidden = true
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) { view.endEditing(true) }
+    @objc func backButtonTap() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) { view.endEditing(true)
+    }
     
     func setUpViews() {
         
         view.backgroundColor = .white
         
+        view.addSubview(backButton)
         view.addSubview(serverImage)
         view.addSubview(nameTextField)
         view.addSubview(emailTextField)
         view.addSubview(passwordTextField)
         view.addSubview(joinButton)
-        view.addSubview(signInButton)
         
         let margin = view.layoutMarginsGuide
+        
+        // Back button constraints
+        view.addConstraints([NSLayoutConstraint(item: backButton, attribute: .left, relatedBy: .equal, toItem: margin, attribute: .leftMargin, multiplier: 1, constant: 20)])
+        
+        view.addConstraints([NSLayoutConstraint(item: backButton, attribute: .top, relatedBy: .equal, toItem: margin, attribute: .topMargin, multiplier: 1, constant: 30)])
+        
+        view.addConstraints([NSLayoutConstraint(item: backButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 40)])
+        
+        view.addConstraints([NSLayoutConstraint(item: backButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 40)])
         
         // Server image constraints
         view.addConstraints([NSLayoutConstraint(item: serverImage, attribute: .centerX, relatedBy: .equal, toItem: margin, attribute: .centerX, multiplier: 1, constant: 0)])
@@ -164,15 +171,6 @@ class JoinViewController: UIViewController {
         view.addConstraints([NSLayoutConstraint(item: joinButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 125)])
         
         view.addConstraints([NSLayoutConstraint(item: joinButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 50)])
-        
-        // Sign in button constraints
-        view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .centerX, relatedBy: .equal, toItem: margin, attribute: .centerX, multiplier: 1, constant: 0)])
-        
-        view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .bottom, relatedBy: .equal, toItem: joinButton, attribute: .bottom, multiplier: 1, constant: 75)])
-        
-        view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 300)])
-        
-        view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 20)])
     }
     
     override func didReceiveMemoryWarning() {

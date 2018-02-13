@@ -72,8 +72,9 @@ class ServerChatController: UICollectionViewController, UICollectionViewDelegate
         }, withCancel: nil)
     }
     
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) { view.endEditing(true) }
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
+    }
     
     // Data source
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {

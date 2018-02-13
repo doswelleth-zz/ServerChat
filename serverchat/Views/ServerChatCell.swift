@@ -57,7 +57,7 @@ class ServerChatCell: UICollectionViewCell {
         image.contentMode = .scaleAspectFill
         image.isUserInteractionEnabled = true
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(blockTap)))
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(declineTap)))
         return image
     }()
     
@@ -67,8 +67,8 @@ class ServerChatCell: UICollectionViewCell {
         image.layer.masksToBounds = true
         image.contentMode = .scaleAspectFill
         image.isUserInteractionEnabled = true
-        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(zoomTap)))
         image.translatesAutoresizingMaskIntoConstraints = false
+        image.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(zoomTap)))
         return image
     }()
     
@@ -94,40 +94,36 @@ class ServerChatCell: UICollectionViewCell {
         }
     }
     
-    @objc func blockTap() {
-        presentBlockAlert()
-    }
-    
-    func presentBlockAlert() {
-        let alert = UIAlertController(title: blockAlertTitle, message: blockMessageTitle, preferredStyle: .actionSheet)
-        let block = UIAlertAction(title: blockActionTitleOne, style: .destructive) { (action) in
-            self.addToListOfBlockedUsers()
+    @objc func declineTap(sender: UIButton) {
+        let alert = UIAlertController(title: declineAlertTitle, message: nil, preferredStyle: .actionSheet)
+        let decline = UIAlertAction(title: declineActionTitleOne, style: .destructive) { (action) in
+            self.declineMessage()
             self.serverChatController?.navigationController?.popViewController(animated: true)
         }
-        let forget = UIAlertAction(title: blockActionTitleTwo, style: .default) { (action) in
+        let forget = UIAlertAction(title: declineActionTitleTwo, style: .default) { (action) in
             // dismiss alert
         }
-        alert.addAction(block)
+        alert.addAction(decline)
         alert.addAction(forget)
         serverChatController?.present(alert, animated: true, completion: nil)
     }
     
-    private let blockAlertTitle = "Block this server?"
-    private let blockMessageTitle = "This server will no longer send you messages."
-    private let blockActionTitleOne = "Block"
-    private let blockActionTitleTwo = "Forget"
+    private let declineAlertTitle = "Remove messages from this server?"
+    private let declineActionTitleOne = "Decline"
+    private let declineActionTitleTwo = "Forget"
     
-    func addToListOfBlockedUsers() {
-        guard let user = message?.chatPartnerID() else { return }
+    let user = User()
+
+    func declineMessage() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
         
-        var blockedUsers : [String] = [user]
-        
-        for blockedUser in blockedUsers {
-            Database.database().reference().child("user").observe(.childRemoved, with: { (snapshot) in
-                //
+        if let chatPartnerID = message?.chatPartnerID() {
+            self.user.isBlocked = uid
+            Database.database().reference().child("user-messages").child(uid).child(chatPartnerID).removeValue(completionBlock: { (error, ref) in
+                if error != nil {
+                    print(error?.localizedDescription as Any)
+                }
             })
-            blockedUsers.append(blockedUser)
-            print(blockedUser)
         }
     }
     
@@ -156,6 +152,11 @@ class ServerChatCell: UICollectionViewCell {
     }
     
     func setUpViews() {
+        
+        if self.user.isBlocked == Auth.auth().currentUser?.uid {
+            print("Blocked")
+        }
+        
         backgroundColor = .white
         
         addSubview(bubbleView)

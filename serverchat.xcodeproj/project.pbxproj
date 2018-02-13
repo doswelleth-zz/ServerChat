@@ -29,8 +29,6 @@
 		A6DA4C3620149650003522D4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A6DA4C352014964F003522D4 /* GoogleService-Info.plist */; };
 		A6F0B6D8202E61ED00FB98A1 /* EulaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F0B6D7202E61ED00FB98A1 /* EulaViewController.swift */; };
 		A6F0B6DA202E652000FB98A1 /* EULA.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F0B6D9202E652000FB98A1 /* EULA.swift */; };
-		A6F0B7222032480900FB98A1 /* UsersNotBlocked.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F0B7212032480900FB98A1 /* UsersNotBlocked.swift */; };
-		A6F0B724203259C900FB98A1 /* Blocked.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F0B723203259C900FB98A1 /* Blocked.swift */; };
 		A6FB3F9B2015E3AF00057EB4 /* StarterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6FB3F9A2015E3AF00057EB4 /* StarterViewController.swift */; };
 		AFF10AC65C08B7FD06FEACF8 /* Pods_serverchatTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A09DCD7B45EDA3C69DC23D4 /* Pods_serverchatTests.framework */; };
 /* End PBXBuildFile section */
@@ -86,8 +84,6 @@
 		A6DA4C352014964F003522D4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A6F0B6D7202E61ED00FB98A1 /* EulaViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EulaViewController.swift; sourceTree = "<group>"; };
 		A6F0B6D9202E652000FB98A1 /* EULA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EULA.swift; sourceTree = "<group>"; };
-		A6F0B7212032480900FB98A1 /* UsersNotBlocked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersNotBlocked.swift; sourceTree = "<group>"; };
-		A6F0B723203259C900FB98A1 /* Blocked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Blocked.swift; sourceTree = "<group>"; };
 		A6FB3F9A2015E3AF00057EB4 /* StarterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterViewController.swift; sourceTree = "<group>"; };
 		BAEB0D6353C31E2FC92AAB36 /* Pods-serverchatTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-serverchatTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-serverchatTests/Pods-serverchatTests.release.xcconfig"; sourceTree = "<group>"; };
 		F13D8072B299B7D1A3291AFC /* Pods-serverchat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-serverchat.release.xcconfig"; path = "Pods/Target Support Files/Pods-serverchat/Pods-serverchat.release.xcconfig"; sourceTree = "<group>"; };
@@ -214,9 +210,7 @@
 			children = (
 				A6F0B6D9202E652000FB98A1 /* EULA.swift */,
 				A62D8C712016F5AB001D1F6B /* User.swift */,
-				A6F0B7212032480900FB98A1 /* UsersNotBlocked.swift */,
 				A693AB9E201C82BB00471BC2 /* Message.swift */,
-				A6F0B723203259C900FB98A1 /* Blocked.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -238,8 +232,8 @@
 			children = (
 				A6FB3F9A2015E3AF00057EB4 /* StarterViewController.swift */,
 				A6F0B6D7202E61ED00FB98A1 /* EulaViewController.swift */,
-				A6AE845420265F23005BCE83 /* JoinViewController.swift */,
 				A6AE8462202A95F9005BCE83 /* SignInViewController.swift */,
+				A6AE845420265F23005BCE83 /* JoinViewController.swift */,
 				A6DA4C2D20145193003522D4 /* MessageTableViewController.swift */,
 				A62D8C6F2016E48D001D1F6B /* NewMessageTableViewController.swift */,
 				A68855F3201AE0C400B14B52 /* ServerChatController.swift */,
@@ -582,8 +576,6 @@
 				A68855F4201AE0C400B14B52 /* ServerChatController.swift in Sources */,
 				A693AB9F201C82BB00471BC2 /* Message.swift in Sources */,
 				A68855EE2018739000B14B52 /* UsersCell.swift in Sources */,
-				A6F0B724203259C900FB98A1 /* Blocked.swift in Sources */,
-				A6F0B7222032480900FB98A1 /* UsersNotBlocked.swift in Sources */,
 				A6CE38B52025294400474FBC /* ServerChatInputContainerView.swift in Sources */,
 				A6DA4BF7201441DB003522D4 /* AppDelegate.swift in Sources */,
 				A6F0B6DA202E652000FB98A1 /* EULA.swift in Sources */,

@@ -71,7 +71,7 @@ class StarterViewController: UIViewController {
             let destination = MessageTableViewController()
             self.navigationController?.pushViewController(destination, animated: true)
         } else {
-            let destination = JoinViewController()
+            let destination = SignInViewController()
             self.navigationController?.pushViewController(destination, animated: true)
         }
     }

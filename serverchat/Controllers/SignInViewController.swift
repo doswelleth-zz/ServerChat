@@ -10,6 +10,7 @@ import UIKit
 import Firebase
 
 let signInText = "Sign In 😎"
+let createAccountText = "Create an account"
 
 private let emailPlaceholder = "email"
 private let passwordPlaceholder = "secret"
@@ -60,6 +61,16 @@ class SignInViewController: UIViewController {
         return button
     }()
     
+    let createAccountButton: UIButton = {
+        let button = UIButton(type: .system) as UIButton
+        button.setTitle(createAccountText, for: .normal)
+        button.setTitleColor(UIColor.appColor(), for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(createAccountTap(sender:)), for: .touchUpInside)
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -83,6 +94,7 @@ class SignInViewController: UIViewController {
             guard let email = emailTextField.text, let password = passwordTextField.text else  { return }
             Auth.auth().signIn(withEmail: email, password: password) { (user, error) in
                 if error != nil {
+                    self.presentSignInError()
                     print("ERROR: ", error?.localizedDescription as Any)
                     return
                 }
@@ -92,15 +104,18 @@ class SignInViewController: UIViewController {
         }
     }
     
+    @objc func createAccountTap(sender: UIButton) {
+        let destination = JoinViewController()
+        self.navigationController?.pushViewController(destination, animated: true)
+    }
+    
     func presentEmptyFieldsAlert() {
-        if emailTextField.text!.isEmpty || passwordTextField.text!.isEmpty {
-            let alert = UIAlertController(title: emptyFieldsAlertTitle, message: emptyFieldsMessageTitle, preferredStyle: .alert)
-            let action = UIAlertAction(title: emptyFieldsActionTitle, style: .default, handler: { (action) in
-                // Dismiss controller
-            })
-            alert.addAction(action)
-            self.present(alert, animated: true, completion: nil)
-        }
+        let alert = UIAlertController(title: emptyFieldsAlertTitle, message: emptyFieldsMessageTitle, preferredStyle: .alert)
+        let action = UIAlertAction(title: emptyFieldsActionTitle, style: .default, handler: { (action) in
+            // Dismiss controller
+        })
+        alert.addAction(action)
+        self.present(alert, animated: true, completion: nil)
     }
     
     func presentSignInError() {
@@ -128,6 +143,7 @@ class SignInViewController: UIViewController {
         view.addSubview(emailTextField)
         view.addSubview(passwordTextField)
         view.addSubview(signInButton)
+        view.addSubview(createAccountButton)
         
         let margin = view.layoutMarginsGuide
         
@@ -158,7 +174,7 @@ class SignInViewController: UIViewController {
         
         view.addConstraints([NSLayoutConstraint(item: passwordTextField, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 40)])
         
-        // Join button constraints
+        // Sign in button constraints
         view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .centerX, relatedBy: .equal, toItem: margin, attribute: .centerX, multiplier: 1, constant: 0)])
         
         view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .bottom, relatedBy: .equal, toItem: passwordTextField, attribute: .bottom, multiplier: 1, constant: 75)])
@@ -166,6 +182,15 @@ class SignInViewController: UIViewController {
         view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 125)])
         
         view.addConstraints([NSLayoutConstraint(item: signInButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 50)])
+        
+        // Create account button constraints
+        view.addConstraints([NSLayoutConstraint(item: createAccountButton, attribute: .centerX, relatedBy: .equal, toItem: margin, attribute: .centerX, multiplier: 1, constant: 0)])
+        
+        view.addConstraints([NSLayoutConstraint(item: createAccountButton, attribute: .bottom, relatedBy: .equal, toItem: signInButton, attribute: .bottom, multiplier: 1, constant: 50)])
+        
+        view.addConstraints([NSLayoutConstraint(item: createAccountButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 125)])
+        
+        view.addConstraints([NSLayoutConstraint(item: createAccountButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 17)])
     }
 
     override func didReceiveMemoryWarning() {

@@ -14,7 +14,6 @@ private let reuseIdentifier = "reuseIdentifier"
 class NewMessageTableViewController: UITableViewController {
     
     var users = [User]()
-    var usersNotBlocked = [UsersNotBlocked]()
     var filteredUsers = [User]()
 
     let searchController = UISearchController(searchResultsController: nil)
@@ -38,7 +37,7 @@ class NewMessageTableViewController: UITableViewController {
         tableView.showsVerticalScrollIndicator = false
         tableView.register(UsersCell.self, forCellReuseIdentifier: reuseIdentifier)
         
-        fetchUsersWithBlockFilter()
+        fetchUser()
     }
     
     func searchBarIsEmpty() -> Bool {
@@ -61,28 +60,21 @@ class NewMessageTableViewController: UITableViewController {
         self.navigationController?.popViewController(animated: true)
     }
     
+    var message : Message?
     var serverChatCell : ServerChatCell?
-    
-    func fetchUsersWithBlockFilter() {
-        serverChatCell?.addToListOfBlockedUsers()
-        
-        if Block().isBlocked == true {
-            Database.database().reference().child("users-notBlocked").observe(.childAdded) { (snapshot) in
-                if let dictionary = snapshot.value as? [String:AnyObject] {
-                    let userNotBlocked = UsersNotBlocked()
-                    userNotBlocked.id = snapshot.key
-                    userNotBlocked.setValuesForKeys(dictionary)
-                    self.usersNotBlocked.append(userNotBlocked)
-                    
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
-                }
-            }
-        } else if Block().isBlocked == false {
-            fetchUser()
-        }
+
+    func presentPopAlert() {
+        let alert = UIAlertController(title: alertTitle, message: messageTitle, preferredStyle: .alert)
+        let action = UIAlertAction(title: actionTitle, style: .default, handler: { (action) in
+            self.navigationController?.popViewController(animated: true)
+        })
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
     }
+    
+    private let alertTitle = "Whoops!"
+    private let messageTitle = "You may not message this user"
+    private let actionTitle = "Okay"
     
     func fetchUser() {
         Database.database().reference().child("users").observe(.childAdded) { (snapshot) in
@@ -103,7 +95,7 @@ class NewMessageTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let user : User
-
+        
         if isFiltering() {
             user = filteredUsers[indexPath.row]
             self.messagesTableViewController?.serverChatTap(user: user)

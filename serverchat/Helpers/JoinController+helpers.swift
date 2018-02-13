@@ -14,12 +14,12 @@ extension JoinViewController: UIImagePickerControllerDelegate, UINavigationContr
     
     // Log in new server with credentials
     @objc func joinTap(sender:UIButton) {
-        presentJoinAlert()
         
         guard let email = emailTextField.text, let password = passwordTextField.text, let name = nameTextField.text else  { return }
         
         Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
             if error != nil {
+                self.presentJoinAlert()
                 print("Error: \(String(describing: error?.localizedDescription))")
             }
             
@@ -42,17 +42,6 @@ extension JoinViewController: UIImagePickerControllerDelegate, UINavigationContr
         }
     }
     
-    func presentJoinAlert() {
-        if nameTextField.text!.isEmpty || emailTextField.text!.isEmpty || passwordTextField.text!.isEmpty {
-            let alert = UIAlertController(title: "Whoops 😮", message: "Please enter all fields correctly", preferredStyle: .alert)
-            let action = UIAlertAction(title: "Okay", style: .default, handler: { (action) in
-                // Dismiss controller
-            })
-            alert.addAction(action)
-            self.present(alert, animated: true, completion: nil)
-        }
-    }
-    
     // Enter new server in our database
     func createNewServer(uid: String, values: [String:AnyObject]) {
         let ref = Database.database().reference()
@@ -68,6 +57,17 @@ extension JoinViewController: UIImagePickerControllerDelegate, UINavigationContr
             let destination = MessageTableViewController()
             self.navigationController?.pushViewController(destination, animated: true)
         })
+    }
+    
+    func presentJoinAlert() {
+        if nameTextField.text!.isEmpty || emailTextField.text!.isEmpty || passwordTextField.text!.isEmpty {
+            let alert = UIAlertController(title: "Whoops 😮", message: "Please enter all fields correctly", preferredStyle: .alert)
+            let action = UIAlertAction(title: "Okay", style: .default, handler: { (action) in
+                // Dismiss controller
+            })
+            alert.addAction(action)
+            self.present(alert, animated: true, completion: nil)
+        }
     }
     
     // Handle image tapped
